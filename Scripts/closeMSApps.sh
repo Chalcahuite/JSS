@@ -1,6 +1,7 @@
 #!/bin/sh
 # closeMSapps.sh
-# detects running Microsoft Apps and prompts user to close before proceeding. 
+# detects running Microsoft Apps and prompts user to close before proceeding.
+# version 1.1 2015-05-04 Changed some wording in comments. Changed back ticks to brackets for variable commands. Added this changes line. 
 
 ## Define Variables
 closeApps="NO"
@@ -27,13 +28,13 @@ fi
 }
 
 
-getuserConsent() # get user OK to close browsers
+getuserConsent() # get user OK to close apps
 {
 jhpath=/Library/Application\ Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper
 iconpath=/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertCautionIcon.icns
-userConsent=`"$jhpath" -windowType hud -title "Please Choose" -heading "Close Microsoft Apps" -description "No Microsoft apps can be running during the Office 2016 Preview installation. Click Yes to proceed." -icon "$iconpath" -button1 "Yes" -button2 "No" -defaultButton 1 -cancelButton 2 -timeout 10 -countdown -lockHUD &`
+userConsent=$(${jhpath} -windowType hud -title "Please Choose" -heading "Close Microsoft Apps" -description "No Microsoft apps can be running during this update. Click Yes to proceed." -icon ${iconpath} -button1 "Yes" -button2 "No" -defaultButton 1 -cancelButton 2 -timeout 10 -countdown -lockHUD &)
 if [[ ${userConsent} == "0" ]]; then
-	echo "User consent given. Proceeding to shut down open browsers...."
+	echo "User consent given. Proceeding to shut down open apps...."
 	closeApps="YES"
 	else
 	echo "User consent not given. Exiting."
@@ -42,7 +43,7 @@ if [[ ${userConsent} == "0" ]]; then
 fi
 }
 
-closeMSApps() # quit Safari gracefully
+closeMSApps() # quit apps gracefully
 {
 osascript -e 'quit app "Microsoft Database Utility"'
 osascript -e 'quit app "Microsoft AutoUpdate"'
@@ -58,7 +59,7 @@ echo "Closing Microsoft Apps."
 
 ## Execute
 
-# Detect running browsers
+# Detect running apps
 echo "Looking to see if there are any Microsoft apps running that need to be closed...."
 detectMSApps
 
@@ -73,7 +74,7 @@ if [[ ${closeApps} == "YES" ]]; then
 	exit 0
 fi
 
-# Close browsers
+# Close apps
 if [[ ${closeApps} == "YES" ]]; then
 	echo "Closing browsers and proceeding with installation...."
 	closeMSApps
