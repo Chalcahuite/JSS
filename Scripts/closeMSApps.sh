@@ -18,7 +18,7 @@ MSDC="Microsoft Document Connection"
 
 detectMSApps() # detects if MSDButil is running
 {
-microsoftPID=`pgrep Microsoft | head -1`
+microsoftPID=$(pgrep Microsoft | head -1)
 if [[ ${microsoftPID} -gt 0 ]]; then
 	echo "Microsoft Apps are running. Proceeding...."
 	closeApps="YES"
