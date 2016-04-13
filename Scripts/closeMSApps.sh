@@ -39,7 +39,7 @@ if [[ ${userConsent} == "0" ]]; then
 	else
 	echo "User consent not given. Exiting."
 	killall jamf
-	exit 1
+	exit 0
 fi
 }
 
