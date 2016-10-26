@@ -30,8 +30,8 @@ fi
 ##Functions
 detectApp() # detects if App is running
 {
-serverPID=$(pgrep "$App" | head -1) 
-if [[ ${serverPID} -gt 0 ]]; then
+appPID=$(pgrep "$App" | head -1) 
+if [[ ${appPID} -gt 0 ]]; then
 	ScriptLogging "$App is running. Proceeding...."
 	closeApp="YES"
 	else
