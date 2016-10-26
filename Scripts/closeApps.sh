@@ -1,6 +1,7 @@
 #!/bin/bash
 # closeApps.sh
 # pre-install script to make sure app is closed before installing. If running, prompt the user for permission to close.
+# logging function "inspired" by Rich Trouton.
 
 #Define Logging
 log_location="/path/to/my.log" #change this to a log file you already use or create a new one. Log will echo to JSS and write locally. 
