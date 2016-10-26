@@ -65,7 +65,7 @@ fi
 
 main()
 {
-  #Check to see if Server.app is running
+  #Check to see if the App is running
   detectApp
 
   # Get User Consent
