@@ -41,7 +41,7 @@ fi
 
 closeApp() # quit Server gracefully
 {
-ScriptLogging "Quitting Server...."
+ScriptLogging "Quitting $App...."
 osascript -e 'quit app "'"$App"'"'
 ScriptLogging "$App closed."
 }
