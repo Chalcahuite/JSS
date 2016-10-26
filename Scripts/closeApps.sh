@@ -39,7 +39,7 @@ if [[ ${appPID} -gt 0 ]]; then
 fi
 }
 
-closeApp() # quit Server gracefully
+closeApp() # quit App gracefully
 {
 ScriptLogging "Quitting $App...."
 osascript -e 'quit app "'"$App"'"'
@@ -72,7 +72,7 @@ main()
   if [[ ${closeApp} == "YES" ]]; then
   	ScriptLogging "$App.app is currently running. Prompting user for permissions to close $App...."
   	getuserConsent
-    # Close Server
+    # Close App
     if [[ ${closeApp} == "YES" ]]; then
     	echo "Closing $App and proceeding with installation...."
     	closeApp
