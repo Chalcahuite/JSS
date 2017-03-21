@@ -163,7 +163,7 @@ setGAL()
     /usr/bin/sudo -u "$User" /usr/bin/osascript << EOF
     tell application "Microsoft Outlook"
 	set accountName to (get name of exchange account 1)
-	set theSearch to text returned of (display dialog "Search the Comcast Global Address Book:" default answer "Enter a name or network login" with icon 1 with title "Search")
+	set theSearch to text returned of (display dialog "Search the Company Global Address Book:" default answer "Enter a name or network login" with icon 1 with title "Search")
 	set visible of shared contacts panel to true
 	tell shared contacts panel
 		set current source to directory source (accountName & " Directory")
@@ -179,7 +179,7 @@ EOF
     /usr/bin/sudo -u "$User" /usr/bin/osascript << EOF
     tell application "Microsoft Outlook"
 	set accountName to (get name of exchange account 1)
-	set theSearch to text returned of (display dialog "Search the Comcast Global Address Book:" default answer "Enter a name or network login" with icon 1 with title "Search")
+	set theSearch to text returned of (display dialog "Search the Company Global Address Book:" default answer "Enter a name or network login" with icon 1 with title "Search")
 	set visible of shared contacts panel to true
 	tell shared contacts panel
 		set current source to directory source (accountName & " Directory")
