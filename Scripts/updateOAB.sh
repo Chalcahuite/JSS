@@ -196,13 +196,13 @@ verifyLDAP()
   verifyNeedsAuthentication=$(/usr/bin/sudo -u "$User" /usr/bin/osascript -e 'tell application "Microsoft Outlook" to get ldap needs authentication of exchange account 1')
   if [[ "$verifySSLEnabled" = "false" ]]; then
     ScriptLogging "Use SSL for Directory Services server not enabled. Enabling."
-    /usr/bin/sudo -u "$User" /usr/bin/osascript -e 'tell application "Microsoft Outlook" to get ldap use ssl of exchange account 1 to true'
+    /usr/bin/sudo -u "$User" /usr/bin/osascript -e 'tell application "Microsoft Outlook" to set ldap use ssl of exchange account 1 to true'
   else
     ScriptLogging "Use SSL for Directory Services server enabled. Proceeding."
   fi
   if [[ "$verifyNeedsAuthentication" = "false" ]]; then
     ScriptLogging "User authentication for Directory Services server not enabled. Enabling."
-    /usr/bin/sudo -u "$User" /usr/bin/osascript -e 'tell application "Microsoft Outlook" to get ldap needs authentication of exchange account 1 to true'
+    /usr/bin/sudo -u "$User" /usr/bin/osascript -e 'tell application "Microsoft Outlook" to set ldap needs authentication of exchange account 1 to true'
   else
     ScriptLogging "User authentication for Directory Services server enabled. Proceeding."
   fi
