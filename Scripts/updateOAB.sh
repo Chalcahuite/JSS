@@ -1,6 +1,6 @@
 #!/bin/bash
 # updateOAB.sh
-# Script to get the Offline Address Book/Global Address List working for Outlook 2016 users. 
+# Deletes the .oab files in a User's Office 2016 profile to force a re-download of the Offline Address Book.
 # © 2016-2017 by Sergio Aviles.
 # version 1.0 2016-01-12
 # version 2.0 2016-05-18 Added warnings for user, and restart Outlook function.
@@ -11,8 +11,8 @@
 # Scriptlogging function stolen shamelessly from Rich Trouton. https://github.com/rtrouton/rtrouton_scripts/blob/d10289c6614b13bb0e27cf8bba00910c08a6c317/rtrouton_scripts/delete_user_keychains/delete_user_keychains.sh
 ScriptLogging()
 {
-    log_location="/Path/To/Log.log"
-    DATE=$(date +%Y-%m-%d\ %H:%M:%S)
+    log_location="/Path/To/Log.log" # change to point to the path you want your log file to live.
+    DATE=$(/bin/date +%Y-%m-%d\ %H:%M:%S)
     LOG="$log_location"
 
     /bin/echo "$DATE" " $1" >> $LOG
@@ -27,11 +27,11 @@ User=$(/usr/bin/python -c 'from SystemConfiguration import SCDynamicStoreCopyCon
 #get current date minus 24 hours
 dateMinus24h=$(/bin/date -v-86400S +%s)
 #get last modified date of udetails.oab file
-oabModifiedDate=$(/usr/bin/stat -Ls "$cachePath"/*/IndexDirName_*/udetails.oab | awk ' { print $10 }' | awk -F= '{print $2}')
+oabModifiedDate=$(/usr/bin/stat -Ls "$cachePath"/*/IndexDirName_*/udetails.oab | /usr/bin/awk ' { print $10 }' | /usr/bin/awk -F= '{print $2}')
 #Logo files (Alter to point to your logo image/icons.)
 iconPath="/path/to/logo.icns"
 #prep icon path for applescript by swapping "/" for ":".
-theIconPath=$(/bin/echo "$iconPath" | sed 's/\//:/g')
+theIconPath=$(/bin/echo "$iconPath" | /usr/bin/sed 's/\//:/g')
 #path to Outlook
 Outlook="/Applications/Microsoft Outlook.app"
 #path to User's Outlook cache
@@ -67,13 +67,13 @@ alertUser()
   #If Outlook 2016 is present and running, warn user that it will need to be restarted after the script runs; if Outlook isn't runnning, proceed silently. If Outlook 2016 isn't on the Mac exit out quietly.
   if [[ -e "$Outlook" ]]; then
     ScriptLogging "Outlook 2016 found. Proceeding."
-    #check if Outlook is running. 
+    #check if Outlook is running.
     if [[ ${OutlookPID} -ge 0 ]]; then
       ScriptLogging "Outlook 2016 is running. Will need to be bounced after purging OAB file."
-      #Set value to restartOutlook for later. 
+      #Set value to restartOutlook for later.
       restartOutlook=1
       #Warn user that Outlook may need to be restarted.
-      sudo -u "$User" /usr/bin/osascript -e 'tell application "System Events"' -e 'with timeout of 86400 seconds' -e 'display dialog "'"$warningText"'" with title "'"$headingText"'" with text buttons {"OK"} default button 1 with hidden answer with icon file "'"$theIconPath"'"' -e 'end timeout' -e 'end tell'
+      /usr/bin/sudo -u "$User" /usr/bin/osascript -e 'tell application "System Events"' -e 'with timeout of 86400 seconds' -e 'display dialog "'"$warningText"'" with title "'"$headingText"'" with text buttons {"OK"} default button 1 with hidden answer with icon file "'"$theIconPath"'"' -e 'end timeout' -e 'end tell'
     else
       #Outlook isn't running. No need to restart. Set restartOutlook value to 0.
       ScriptLogging "Outlook 2016 is not running. Proceeding."
@@ -82,7 +82,7 @@ alertUser()
   else
     #Outlook 2016 not on this box. Inform user that there's no Outlook 2016 and then exit without doing anything.
     ScriptLogging "Outlook 2016 not found. Exiting."
-    sudo -u "$User" /usr/bin/osascript -e 'tell application "System Events"' -e 'with timeout of 86400 seconds' -e 'display dialog "'"$oldVersionText"'" with title "'"$headingText"'" with text buttons {"OK"} default button 1 with hidden answer with icon file "'"$theIconPath"'"' -e 'end timeout' -e 'end tell'
+    /usr/bin/sudo -u "$User" /usr/bin/osascript -e 'tell application "System Events"' -e 'with timeout of 86400 seconds' -e 'display dialog "'"$oldVersionText"'" with title "'"$headingText"'" with text buttons {"OK"} default button 1 with hidden answer with icon file "'"$theIconPath"'"' -e 'end timeout' -e 'end tell'
     ScriptLogging "-----END-----"
     exit 0
   fi
@@ -113,13 +113,13 @@ purgeOAB()
 # If the last modified date of the udetails.oab file is older than the current date minus 24 hours then delete all the .oab files to force a download.
 ScriptLogging "Determining whether last modified date of OAB is older than 24 hours ago."
 if [[ ${dateMinus24h} -gt ${oabModifiedDate} ]]; then
-  sudo -u "$User" /usr/bin/osascript -e 'tell application "System Events"' -e 'with timeout of 86400 seconds' -e 'display dialog "'"$purgeText"'" with title "'"$headingText"'" with text buttons {"OK"} default button 1 with hidden answer with icon file "'"$theIconPath"'"' -e 'end timeout' -e 'end tell'
+  /usr/bin/sudo -u "$User" /usr/bin/osascript -e 'tell application "System Events"' -e 'with timeout of 86400 seconds' -e 'display dialog "'"$purgeText"'" with title "'"$headingText"'" with text buttons {"OK"} default button 1 with hidden answer with icon file "'"$theIconPath"'"' -e 'end timeout' -e 'end tell'
   /bin/rm -r "$cachePath/*/IndexDirName_*/*.oab"
   ScriptLogging "OAB last modified date is older than 24 hours. Deleting all .oab files to force a new download."
   restartApp
 else
-  ScriptLogging "OAB has been recently updated. No force update required. "  
-  sudo -u "$User" /usr/bin/osascript -e 'tell application "System Events"' -e 'with timeout of 86400 seconds' -e 'display dialog "'"$noAction"'" with title "'"$headingText"'" with text buttons {"OK"} default button 1 with hidden answer with icon file "'"$theIconPath"'"' -e 'end timeout' -e 'end tell'
+  ScriptLogging "OAB has been recently updated. No force update required. "
+  /usr/bin/sudo -u "$User" /usr/bin/osascript -e 'tell application "System Events"' -e 'with timeout of 86400 seconds' -e 'display dialog "'"$noAction"'" with title "'"$headingText"'" with text buttons {"OK"} default button 1 with hidden answer with icon file "'"$theIconPath"'"' -e 'end timeout' -e 'end tell'
 fi
 }
 
@@ -163,7 +163,7 @@ setGAL()
     /usr/bin/sudo -u "$User" /usr/bin/osascript << EOF
     tell application "Microsoft Outlook"
 	set accountName to (get name of exchange account 1)
-	set theSearch to text returned of (display dialog "Search the Company Global Address Book:" default answer "Enter a name or network login" with icon 1 with title "Search")
+	set theSearch to text returned of (display dialog "Search the Comcast Global Address Book:" default answer "Enter a name or network login" with icon 1 with title "Search")
 	set visible of shared contacts panel to true
 	tell shared contacts panel
 		set current source to directory source (accountName & " Directory")
@@ -179,7 +179,7 @@ EOF
     /usr/bin/sudo -u "$User" /usr/bin/osascript << EOF
     tell application "Microsoft Outlook"
 	set accountName to (get name of exchange account 1)
-	set theSearch to text returned of (display dialog "Search the Company Global Address Book:" default answer "Enter a name or network login" with icon 1 with title "Search")
+	set theSearch to text returned of (display dialog "Search the Comcast Global Address Book:" default answer "Enter a name or network login" with icon 1 with title "Search")
 	set visible of shared contacts panel to true
 	tell shared contacts panel
 		set current source to directory source (accountName & " Directory")
