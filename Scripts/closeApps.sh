@@ -50,7 +50,7 @@ getuserConsent() # get user OK to close app, if running
 {
 jhpath="/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper"
 AppPath=$(find -x / -name "$App.app" | awk 'NR==1 {print $0}')
-iconName=$(ls $AppPath/Content/Resources/ | grep "icns")
+iconName=$(ls $AppPath/Contents/Resources/ | grep "icns")
 iconpath="$AppPath/Contents/Resources/$iconName"
 # Change the title to your IT Org name. 
 userConsent=$("$jhpath" -windowType hud -title "Your IT Department here" -heading "'"$App Updater"'" -description "Can we close $App to update it to a new version?" -icon "$iconpath" -button1 "Yes" -button2 "No" -defaultButton 1 -cancelButton 2 -timeout 300 -countdown -lockHUD &)
