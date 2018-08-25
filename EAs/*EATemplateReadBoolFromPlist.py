@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
-"""EA Template for reading boolean value from a .plist."""
+"""EA Template for reading boolean value from a plist."""
 
 import os
 import CoreFoundation
 
-plist = '/Library/Preferences/com.comcast.cable.cis.plist'
+plist = '/path/to/plist'
 
 if os.path.exists(plist):
-    """Substitute key (FirstBootRun) and bundle identifier (com.comcast.cable.cis) as necessary."""
-    value = CoreFoundation.CFPreferencesCopyAppValue(
-        "FirstBootRun", "com.comcast.cable.cis")
+    """Substitute key (someKey) and bundle identifier (tld.company.app) as necessary."""
+    value = CoreFoundation.CFPreferencesCopyAppValue("someKey", "tld.company.app")
     if value is None:
         print '<results>False</results>'
     else:
