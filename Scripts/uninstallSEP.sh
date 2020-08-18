@@ -12,13 +12,13 @@
 ScriptLogging()
 {
     #Define Logging
-    log_location="/path/to/your/own/log/file.log"
+    log_location="/path/to/your/own/log/file.log" #Specify a file path to log to.
     DATE=$(/bin/date +%Y-%m-%d\ %H:%M:%S)
     LOG="$log_location"
     script_name="Uninstall SEP"
     
     /bin/echo "$DATE" "[$script_name] $1" >> $LOG
-    /bin/echo "$DATE" "[$script_name] $1" 
+    /bin/echo "$DATE" "[$script_name] $1" # Script will also echo out to be picked up by Jamf Pro. May be commented out/removed if not using Jamf Pro.
 }
 
 removeLaunchDaemons()
@@ -28,7 +28,7 @@ removeLaunchDaemons()
     # echo "${LaunchDaemons[*]}"
     if [[ -n "${LaunchDaemons[*]}" ]]; then 
         ScriptLogging "Found LaunchDaemons to remove."
-        for ld in ${LaunchDaemons[@]}; do
+        for ld in ${LaunchDaemons[@]}; do #Quoting the LaunchDaemons array here seems to not work, so left unquoted. 
             ScriptLogging "Unloading $ld"
             /bin/launchctl bootout system "$ld"
             ScriptLogging "Removing $ld"
