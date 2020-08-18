@@ -2,7 +2,7 @@
 # uninstallSEP.sh
 # Script to uninstall Symantec Endpoint Protection and all its components. Requires restart when complete.
 # Based on examining and manually testing paths listed in the Symantec Removal Tool.
-# ©2020 by Sergio Aviles. 
+# 
 # version 1.0.0 2020-03-30
 # version 1.1.0 2020-07-14 Add check for app in "Incompatible Software" folder. 
 # version 1.1.1 2020-08-18 Forked for public consumption. 
