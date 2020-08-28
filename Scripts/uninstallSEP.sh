@@ -1,11 +1,15 @@
 #!/bin/bash
 # uninstallSEP.sh
 # Script to uninstall Symantec Endpoint Protection and all its components. Requires restart when complete.
-# Based on examining and manually testing paths listed in the Symantec Removal Tool.
+# Based on examining and manually testing paths listed in the Symantec Removal Tool. 
+# !!WARNING: This script cannot remove the installed systemextension included with SEP versions 14.3 and later!!
+# Please file feedback with Apple to provide a method for automating the removal of a systemextension.
 # 
 # version 1.0.0 2020-03-30
 # version 1.1.0 2020-07-14 Add check for app in "Incompatible Software" folder. 
-# version 1.1.1 2020-08-18 Forked for public consumption. 
+# version 1.1.1 2020-08-18 Forked for public consumption.
+# version 1.2.0 2020-08-28 Added additional library included in newer versions for
+#                          for removal. Added missing rm line for binaries. 
 
 
 ##Variables
@@ -107,23 +111,28 @@ removeFiles()
         ScriptLogging "No files found in /tmp. Skipping."
     fi
 
-    #Remove binaries and libraries.
+   #Remove binaries and libraries.
     binaries=('com.symantec.sep.SyLinkDropHelper' 'nortonscanner')
     for b in "${binaries[@]}"; do
         bin_path="/usr/local/bin/$b"
         if [[ -e  "$bin_path" ]]; then 
             ScriptLogging "Found binary $b. Removing."
+            /bin/rm -f "$bin_path"
         else
             ScriptLogging "Binaries not fould skipping."
         fi
     done
     
-    if [[ -e "/usr/local/lib/libecomldor.dylib" ]]; then 
-        ScriptLogging "Removing library."
-        /bin/rm -f "/usr/local/lib/libecomldor.dylib"
-    else
-        ScriptLogging "Library not found. Skipping."
-    fi
+    libraries=('libecomldor.dylib' 'libUIAgentFeature.a')
+    for l in "${libraries[@]}"; do
+        lib_path="/usr/local/lib/$l"
+        if [[ -e "$lib_path" ]]; then 
+            ScriptLogging "Found $l. Removing library."
+            /bin/rm -f "$lib_path"
+        else
+            ScriptLogging "Library not found. Skipping."
+        fi
+    done
 
     #Remove conf files.
     if [[ -e "/private/etc/symantec" ]]; then 
