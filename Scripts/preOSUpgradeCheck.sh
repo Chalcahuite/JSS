@@ -140,6 +140,7 @@ removeApp()
 
 checkDiskSpace()
 {
+  # Function liberated from https://github.com/kc9wwh/macOSUpgrade
   ##Check if free space > 25GB
   osMajor=$( /usr/bin/sw_vers -productVersion | /usr/bin/awk -F. '{print $2}' )
   osMinor=$( /usr/bin/sw_vers -productVersion | /usr/bin/awk -F. '{print $3}' )
