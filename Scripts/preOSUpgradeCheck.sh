@@ -156,6 +156,16 @@ checkDiskSpace()
   else
       spaceStatus="ERROR"
       ScriptLogging "Disk Check: ERROR - ${freeSpace%.*} Bytes Free Space Detected"
+      if [[ "$runSilent" != "NO" ]]; then
+        ScriptLogging "Alerting user."
+        runAsUser /usr/bin/osascript -e 'display dialog "The free disk space available is insufficient to upgrade the OS. A minimum of 25GBs is needed to perform this upgrade. Click \"OK\" to exit." with title "An error has occurrred" buttons {"OK"} default button 1 with icon caution giving up after 15'
+        ScriptLogging "-----End-----"
+        exit 1
+      else
+        ScriptLogging "Silent flag set. Skipping alert. Exiting."
+        ScriptLogging "-----End-----"
+        exit 1
+      fi
   fi
 }
 
