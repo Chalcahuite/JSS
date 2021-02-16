@@ -98,7 +98,7 @@ updateApp()
   if [[ -e "$AppPath" ]]; then 
     ScriptLogging "MyApp is installed. Checking version."
     if [[ ${AppVersion} -lt 1234 ]]; then 
-      if [[ "$runSilent" != "YES" ]]; then
+      if [[ "$runSilent" != "NO" ]]; then
         ScriptLogging "MyApp needs to be updated for $macOSName compatibility. Alerting user."
         runAsUser /usr/bin/osascript -e 'display dialog "Your version of MyApp needs to be upgraded for $macOSName compatibility. Standby." with title "'"$macOSName"' Pre-Upgrade Check" with icon file "'"$theIconPath"'" giving up after 5'
         ScriptLogging "Installing $macOSName compatible version of MyApp."
@@ -122,7 +122,7 @@ removeApp()
   ScriptLogging "Verifying if MyOtherApp is installed."
   if [[ -e "$AppPath" ]]; then
     ScriptLogging "MyOtherApp is installed. Removing."
-    if [[ "$runSilent" != "YES" ]]; then 
+    if [[ "$runSilent" != "NO" ]]; then 
       ScriptLogging "Alerting user."
       result=$(runAsUser /usr/bin/osascript -e 'set result to button returned of (display dialog "MyOtherApp needs to be removed before upgrading. A restarted is required. Click "OK" to proceed" buttons {"Cancel", "OK"} default button 2 with title "'"$macOSName"' Pre-Upgrade Check" with icon file "'"$theIconPath"'" giving up after 5')
       if [[ "$result" == "OK" ]]; then 
