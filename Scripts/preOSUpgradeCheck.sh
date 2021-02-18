@@ -3,6 +3,8 @@
 # Script to verify apps compatible before upgrading. Presumes Jamf Pro as management tool. 
 # ©2021 by Sergio Aviles.
 # version 1.0.0 2021-02-15 Forked and sanitized for public use. 
+# version 1.0.1 2021-02-18 Fixed issue where prompts were not seen if runSilent was set to "NO." Future proofed JSSTrust function. Added alert for 
+#                          disk space errors. Added extra conditional to disk space check to account for more larger space requirements for Mojave and earlier. 
 
 ##Variables
 User=$(/usr/sbin/scutil <<< "show State:/Users/ConsoleUser" | /usr/bin/awk -F': ' '/[[:space:]]+Name[[:space:]]:/ { if ( $2 != "loginwindow" ) { print $2 }}')
@@ -98,7 +100,7 @@ updateApp()
   if [[ -e "$AppPath" ]]; then 
     ScriptLogging "MyApp is installed. Checking version."
     if [[ ${AppVersion} -lt 1234 ]]; then 
-      if [[ "$runSilent" != "NO" ]]; then
+      if [[ "$runSilent" == "NO" ]]; then
         ScriptLogging "MyApp needs to be updated for $macOSName compatibility. Alerting user."
         runAsUser /usr/bin/osascript -e 'display dialog "Your version of MyApp needs to be upgraded for $macOSName compatibility. Standby." with title "'"$macOSName"' Pre-Upgrade Check" with icon file "'"$theIconPath"'" giving up after 5'
         ScriptLogging "Installing $macOSName compatible version of MyApp."
@@ -122,7 +124,7 @@ removeApp()
   ScriptLogging "Verifying if MyOtherApp is installed."
   if [[ -e "$AppPath" ]]; then
     ScriptLogging "MyOtherApp is installed. Removing."
-    if [[ "$runSilent" != "NO" ]]; then 
+    if [[ "$runSilent" == "NO" ]]; then 
       ScriptLogging "Alerting user."
       result=$(runAsUser /usr/bin/osascript -e 'set result to button returned of (display dialog "MyOtherApp needs to be removed before upgrading. A restarted is required. Click "OK" to proceed" buttons {"Cancel", "OK"} default button 2 with title "'"$macOSName"' Pre-Upgrade Check" with icon file "'"$theIconPath"'" giving up after 5')
       if [[ "$result" == "OK" ]]; then 
@@ -150,22 +152,42 @@ checkDiskSpace()
       freeSpace=$( /usr/sbin/diskutil info / | /usr/bin/grep "Free Space" | /usr/bin/awk '{print $6}' | /usr/bin/cut -c 2- )
   fi
 
-  if [[ ${freeSpace%.*} -ge 25000000000 ]]; then
-      spaceStatus="OK"
-      ScriptLogging "Disk Check: OK - ${freeSpace%.*} Bytes Free Space Detected"
+  if [[ $osMajor -eq 15 ]]; then
+    if [[ ${freeSpace%.*} -ge 25000000000 ]]; then
+        spaceStatus="OK"
+        ScriptLogging "Disk Check: OK - ${freeSpace%.*} Bytes Free Space Detected"
+    else
+        spaceStatus="ERROR"
+        ScriptLogging "Disk Check: ERROR - ${freeSpace%.*} Bytes Free Space Detected"
+        if [[ "$runSilent" == "NO" ]]; then
+          ScriptLogging "Alerting user."
+          runAsUser /usr/bin/osascript -e 'display dialog "The free disk space available is insufficient to upgrade the OS. A minimum of 25GBs is needed to perform this upgrade. Click \"OK\" to exit." with title "An error has occurrred" buttons {"OK"} default button 1 with icon caution giving up after 15'
+          ScriptLogging "-----End-----"
+          exit 1
+        else
+          ScriptLogging "Silent flag set. Skipping alert. Exiting."
+          ScriptLogging "-----End-----"
+          exit 1
+        fi
+    fi
   else
-      spaceStatus="ERROR"
-      ScriptLogging "Disk Check: ERROR - ${freeSpace%.*} Bytes Free Space Detected"
-      if [[ "$runSilent" != "NO" ]]; then
-        ScriptLogging "Alerting user."
-        runAsUser /usr/bin/osascript -e 'display dialog "The free disk space available is insufficient to upgrade the OS. A minimum of 25GBs is needed to perform this upgrade. Click \"OK\" to exit." with title "An error has occurrred" buttons {"OK"} default button 1 with icon caution giving up after 15'
-        ScriptLogging "-----End-----"
-        exit 1
-      else
-        ScriptLogging "Silent flag set. Skipping alert. Exiting."
-        ScriptLogging "-----End-----"
-        exit 1
-      fi
+    if [[ ${freeSpace%.*} -ge 45000000000 ]]; then
+        spaceStatus="OK"
+        ScriptLogging "Disk Check: OK - ${freeSpace%.*} Bytes Free Space Detected"
+    else
+        spaceStatus="ERROR"
+        ScriptLogging "Disk Check: ERROR - ${freeSpace%.*} Bytes Free Space Detected"
+        if [[ "$runSilent" == "NO" ]]; then
+          ScriptLogging "Alerting user."
+          runAsUser /usr/bin/osascript -e 'display dialog "The free disk space available is insufficient to upgrade the OS. A minimum of 45GBs is needed to perform this upgrade. Click \"OK\" to exit." with title "An error has occurrred" buttons {"OK"} default button 1 with icon caution giving up after 15'
+          ScriptLogging "-----End-----"
+          exit 1
+        else
+          ScriptLogging "Silent flag set. Skipping alert. Exiting."
+          ScriptLogging "-----End-----"
+          exit 1
+        fi
+    fi
   fi
 }
 
