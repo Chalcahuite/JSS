@@ -10,6 +10,7 @@
 # version 1.1.1 2020-08-18 Forked for public consumption.
 # version 1.2.0 2020-08-28 Added additional library included in newer versions for
 #                          for removal. Added missing rm line for binaries. 
+# version 1.3.0 2021-04-19 Updated script to include system extension removal.
 
 
 ##Variables
@@ -45,6 +46,27 @@ removeLaunchDaemons()
     fi 
 }
 
+removeApp()
+{
+   # Usage:     RemoveApp $1
+   # Argument:  $1 = App to remove.
+   # Summary:   Use AppleScript to move app to Trash so that system extension
+   #            will be uninstalled after reboot.
+   local app="$1"
+   if [[ -z "$app" ]] | [[ ! -d "$app" ]]; then
+     return 1
+   fi
+   echo "Removing $app"
+   /usr/bin/osascript -e "tell application \"Finder\" to delete POSIX file \"${app}\""
+   if [ -d "$app" ]; then
+     ScriptLogging "Failed to remove $app."
+     return 1
+   else
+     ScriptLogging "$app was successfully removed."
+     return 0
+   fi
+}
+
 removeFiles()
 {
     #Remove all support files and apps. 
@@ -53,7 +75,7 @@ removeFiles()
     if [[ -n "${regid_files[*]}" ]]; then 
         ScriptLogging "Removing regid files"
         for r in "${regid_files[@]}"; do
-        /bin/rm -f "$r"
+        /bin/rm -rf "$r"
         done
     else
         ScriptLogging "No regid files found. Skipping."
@@ -69,8 +91,16 @@ removeFiles()
 
     #Remove the Symantec Apps. 
     if [[ -e "/Applications/Symantec Solutions" ]]; then 
-        ScriptLogging "Found Symantec app folder. Deleting."
-        /bin/rm -rf "/Applications/Symantec Solutions"
+        SEPVersion=$(/usr/bin/defaults read "/Applications/Symantec Solutions/Symantec Endpoint Protection.app/Contents/Info.plist" CFBundleShortVersionString | /usr/bin/awk -F\. '{print $1$2}')
+        ScriptLogging "Found Symantec app folder."
+        if [[ "${SEPVersion}" -ge 143 ]]; then 
+            ScriptLogging "This version of SEP contains a system extension. Moving to the trash."
+            removeApp "/Applications/Symantec Solutions/Symantec Endpoint Protection.app"
+            /bin/rm -rf "/Applications/Symantec Solutions"
+        else
+            ScriptLogging "This version of SEP does not contain a system extension. Deleting."
+            /bin/rm -rf "/Applications/Symantec Solutions"
+        fi  
     else
         ScriptLogging "Symantec app folder not found. Skipping."
     fi
@@ -98,7 +128,7 @@ removeFiles()
     #Remove preference file
     if [[ -e "/Library/Preferences/com.symantec.trace.plist" ]]; then 
         ScriptLogging "Found trace preference file. Removing."
-        /bin/rm -f "/Library/Preferences/com.symantec.trace.plist"
+        /bin/rm -rf "/Library/Preferences/com.symantec.trace.plist"
     else
         ScriptLogging "Trace preference file not found. Skipping."
     fi
@@ -111,13 +141,13 @@ removeFiles()
         ScriptLogging "No files found in /tmp. Skipping."
     fi
 
-   #Remove binaries and libraries.
+    #Remove binaries and libraries.
     binaries=('com.symantec.sep.SyLinkDropHelper' 'nortonscanner')
     for b in "${binaries[@]}"; do
         bin_path="/usr/local/bin/$b"
         if [[ -e  "$bin_path" ]]; then 
             ScriptLogging "Found binary $b. Removing."
-            /bin/rm -f "$bin_path"
+            /bin/rm -rf "$bin_path"
         else
             ScriptLogging "Binaries not fould skipping."
         fi
