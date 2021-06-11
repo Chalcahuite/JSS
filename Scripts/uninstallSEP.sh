@@ -90,11 +90,16 @@ removeFiles()
     fi
 
     #Remove the Symantec Apps. 
-    if [[ -e "/Applications/Symantec Solutions" ]]; then 
-        SEPVersion=$(/usr/bin/defaults read "/Applications/Symantec Solutions/Symantec Endpoint Protection.app/Contents/Info.plist" CFBundleShortVersionString | /usr/bin/awk -F\. '{print $1$2}')
+    if [[ -e "/Applications/Symantec Solutions" ]]; then
+        if [ -d "/Applications/Symantec Endpoint Protection.app" ]; then
+            SEPVersion=$(/usr/bin/defaults read "/Applications/Symantec Endpoint Protection.app/Contents/Info.plist" CFBundleShortVersionString | /usr/bin/awk -F\. '{print $1$2}')
+        else
+            SEPVersion=$(/usr/bin/defaults read "/Applications/Symantec Solutions/Symantec Endpoint Protection.app/Contents/Info.plist" CFBundleShortVersionString | /usr/bin/awk -F\. '{print $1$2}')
+        fi
         ScriptLogging "Found Symantec app folder."
         if [[ "${SEPVersion}" -ge 143 ]]; then 
             ScriptLogging "This version of SEP contains a system extension. Moving to the trash."
+            removeApp "/Applications/Symantec Endpoint Protection.app"
             removeApp "/Applications/Symantec Solutions/Symantec Endpoint Protection.app"
             /bin/rm -rf "/Applications/Symantec Solutions"
         else
